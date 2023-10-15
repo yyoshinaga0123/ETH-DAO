@@ -29,9 +29,6 @@ if (!THIRDWEB_SECRET_KEY || THIRDWEB_SECRET_KEY === '') {
   console.log('🛑 Thirdweb Secret Key not found.');
 }
 
-//const apiKey = "YOUR_API_KEY_HERE"; 
-// const apiKey = "UNCHAIN_ETC_DAO_20231015"; 
-
 // const sdk = new ThirdwebSDK(
 //   new ethers.Wallet(PRIVATE_KEY!, ethers.getDefaultProvider(ALCHEMY_API_URL)),
 // );
@@ -44,15 +41,6 @@ const sdk = ThirdwebSDK.fromPrivateKey(
     secretKey: THIRDWEB_SECRET_KEY, // Use secret key if using on the server, get it from dashboard settings
   },
 );
-
-// const sdk = ThirdwebSDK.fromWallet(
-//   new ethers.Wallet(PRIVATE_KEY!, ethers.getDefaultProvider(ALCHEMY_API_URL)),
-//   "ethereum",
-//   {
-//     accessKeyId: "UNCHAIN_ETC_DAO_20231015",
-//     secretAccessKey: "xxxxx",
-//   }
-// );
 
 
 // ここでスクリプトを実行
