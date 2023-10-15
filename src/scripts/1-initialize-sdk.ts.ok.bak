@@ -4,7 +4,7 @@ import ethers from 'ethers';
 
 const { loadEnvConfig } = nextEnv;
 // 環境変数を env ファイルから読み込む
-const { PRIVATE_KEY, ALCHEMY_API_URL, WALLET_ADDRESS, THIRDWEB_CLIENT_ID, THIRDWEB_SECRET_KEY } = loadEnvConfig(
+const { PRIVATE_KEY, ALCHEMY_API_URL, WALLET_ADDRESS } = loadEnvConfig(
   process.cwd()
 ).combinedEnv;
 
@@ -21,14 +21,6 @@ if (!WALLET_ADDRESS || WALLET_ADDRESS === '') {
   console.log('🛑 Wallet Address not found.');
 }
 
-if (!THIRDWEB_CLIENT_ID || THIRDWEB_CLIENT_ID === '') {
-  console.log('🛑 Thirdweb Client ID not found.');
-}
-
-if (!THIRDWEB_SECRET_KEY || THIRDWEB_SECRET_KEY === '') {
-  console.log('🛑 Thirdweb Secret Key not found.');
-}
-
 //const apiKey = "YOUR_API_KEY_HERE"; 
 // const apiKey = "UNCHAIN_ETC_DAO_20231015"; 
 
@@ -37,11 +29,11 @@ if (!THIRDWEB_SECRET_KEY || THIRDWEB_SECRET_KEY === '') {
 // );
 
 const sdk = ThirdwebSDK.fromPrivateKey(
-  PRIVATE_KEY!, // Your wallet's private key (only required for write operations)
+  "793a9d04983c139eaf79de8c7882c4aa266860a7143cc051943c2cdf04e20f73", // Your wallet's private key (only required for write operations)
   "ethereum",
   {
-    clientId: THIRDWEB_CLIENT_ID, // Use client id if using on the client side, get it from dashboard settings
-    secretKey: THIRDWEB_SECRET_KEY, // Use secret key if using on the server, get it from dashboard settings
+    clientId: "90745e150e9de234abd719ec6bf5873c", // Use client id if using on the client side, get it from dashboard settings
+    secretKey: "Nu-HpyyaeSg8E8A6-uZxO-ainEJqr_C4MQ0OTfOBQdtEZA1ZYVTj1nbhhUxIkt53Jx4pFtCpLqX65yT-OY6Alg", // Use secret key if using on the server, get it from dashboard settings
   },
 );
 
