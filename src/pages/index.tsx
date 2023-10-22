@@ -8,6 +8,7 @@ import {
 } from '@thirdweb-dev/react';
 import type { NextPage } from 'next';
 import { useEffect, useMemo, useState } from 'react';
+import { Proposal } from '@thirdweb-dev/sdk';
 
 import styles from '../styles/Home.module.css';
 
@@ -29,6 +30,12 @@ const Home: NextPage = () => {
     'token',
   ).contract;
 
+  // 投票コントラクトの初期化
+  const vote = useContract(
+    'INSERT_VOTE_ADDRESS',
+    'vote',
+  ).contract;
+
   // ユーザーがメンバーシップ NFT を持っているかどうかを知るためのステートを定義
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
 
@@ -38,10 +45,60 @@ const Home: NextPage = () => {
   // DAO メンバーのアドレスをステートで宣言
   const [memberAddresses, setMemberAddresses] = useState<string[] | undefined>([]);
 
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [isVoting, setIsVoting] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+
   // アドレスの長さを省略してくれる便利な関数
   const shortenAddress = (str: string) => {
     return str.substring(0, 6) + '...' + str.substring(str.length - 4);
   };
+
+  // コントラクトから既存の提案を全て取得します
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    // vote!.getAll() を使用して提案を取得します
+    const getAllProposals = async () => {
+      try {
+        const proposals = await vote!.getAll();
+        setProposals(proposals);
+        console.log('🌈 Proposals:', proposals);
+      } catch (error) {
+        console.log('failed to get proposals', error);
+      }
+    };
+    getAllProposals();
+  }, [hasClaimedNFT, vote]);
+
+  // ユーザーがすでに投票したかどうか確認します
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    // 提案を取得し終えない限り、ユーザーが投票したかどうかを確認することができない
+    if (!proposals.length) {
+      return;
+    }
+
+    const checkIfUserHasVoted = async () => {
+      try {
+        const hasVoted = await vote!.hasVoted(proposals[0].proposalId.toString(), address);
+        setHasVoted(hasVoted);
+        if (hasVoted) {
+          console.log('🥵 User has already voted');
+        } else {
+          console.log('🙂 User has not voted yet');
+        }
+      } catch (error) {
+        console.error('Failed to check if wallet has voted', error);
+      }
+    };
+    checkIfUserHasVoted();
+  }, [hasClaimedNFT, proposals, address, vote]);
 
   // メンバーシップを保持しているメンバーの全アドレスを取得します
   useEffect(() => {
