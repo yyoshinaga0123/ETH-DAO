@@ -278,7 +278,7 @@ const Home: NextPage = () => {
                       vote: 2,
                     };
                     proposal.votes.forEach((vote) => {
-                      const elem = document.getElementBychainId(
+                      const elem = document.getElementById(
                         proposal.proposalId + '-' + vote.type
                       ) as HTMLInputElement;
 
@@ -347,7 +347,7 @@ const Home: NextPage = () => {
                         <div key={type}>
                           <input
                             type="radio"
-                            chainId={proposal.proposalId + '-' + type}
+                            id={proposal.proposalId + '-' + type}
                             name={proposal.proposalId.toString()}
                             value={type}
                             // デフォルトで棄権票をチェックする
