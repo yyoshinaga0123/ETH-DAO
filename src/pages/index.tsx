@@ -7,7 +7,7 @@ import {
   useContract,
 } from '@thirdweb-dev/react';
 import type { NextPage } from 'next';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import styles from '../styles/Home.module.css';
 
@@ -23,8 +23,81 @@ const Home: NextPage = () => {
     'edition-drop',
   ).contract;
 
+  // トークンコントラクトの初期化
+  const token = useContract(
+    'INSERT_TOKEN_ADDRESS',
+    'token',
+  ).contract;
+
   // ユーザーがメンバーシップ NFT を持っているかどうかを知るためのステートを定義
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
+
+  // メンバーごとの保有しているトークンの数をステートとして宣言
+  const [memberTokenAmounts, setMemberTokenAmounts] = useState<any>([]);
+  
+  // DAO メンバーのアドレスをステートで宣言
+  const [memberAddresses, setMemberAddresses] = useState<string[] | undefined>([]);
+
+  // アドレスの長さを省略してくれる便利な関数
+  const shortenAddress = (str: string) => {
+    return str.substring(0, 6) + '...' + str.substring(str.length - 4);
+  };
+
+  // メンバーシップを保持しているメンバーの全アドレスを取得します
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    // 先ほどエアドロップしたユーザーがここで取得できます（発行された tokenID 0 のメンバーシップ NFT）
+    const getAllAddresses = async () => {
+      try {
+        const memberAddresses = await editionDrop?.history.getAllClaimerAddresses(
+          0
+        );
+        setMemberAddresses(memberAddresses);
+        console.log('🚀 Members addresses', memberAddresses);
+      } catch (error) {
+        console.error('failed to get member list', error);
+      }
+    };
+    getAllAddresses();
+  }, [hasClaimedNFT, editionDrop?.history]);
+
+  // 各メンバーが保持するトークンの数を取得します
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    const getAllBalances = async () => {
+      try {
+        const amounts = await token?.history.getAllHolderBalances();
+        setMemberTokenAmounts(amounts);
+        console.log('👜 Amounts', amounts);
+      } catch (error) {
+        console.error('failed to get member balances', error);
+      }
+    };
+    getAllBalances();
+  }, [hasClaimedNFT, token?.history]);
+
+  // memberAddresses と memberTokenAmounts を 1 つの配列に結合します
+  const memberList = useMemo(() => {
+    return memberAddresses?.map((address) => {
+      // memberTokenAmounts 配列でアドレスが見つかっているかどうかを確認します
+      // その場合、ユーザーが持っているトークンの量を返します
+      // それ以外の場合は 0 を返します
+      const member = memberTokenAmounts?.find(
+        ({ holder }: {holder: string}) => holder === address,
+      );
+
+      return {
+        address,
+        tokenAmount: member?.balance.displayValue || '0',
+      };
+    });
+  }, [memberAddresses, memberTokenAmounts]);
 
   // NFT をミンティングしている間を表すステートを定義
   const [isClaiming, setIsClaiming] = useState(false);
