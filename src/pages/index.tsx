@@ -1,4 +1,4 @@
-// 接続中のネットワークを取得するため useNetwork を新たにインポートします。
+import { AddressZero } from '@ethersproject/constants';
 import { Sepolia } from '@thirdweb-dev/chains';
 import {
   ConnectWallet,
@@ -6,10 +6,9 @@ import {
   useChain,
   useContract,
 } from '@thirdweb-dev/react';
-import type { NextPage } from 'next';
-import { useEffect, useMemo, useState } from 'react';
 import { Proposal } from '@thirdweb-dev/sdk';
-import { AddressZero } from '@ethersproject/constants';
+import type { NextPage } from 'next';
+import { useEffect, useMemo, useState} from 'react';
 
 import styles from '../styles/Home.module.css';
 
@@ -40,9 +39,12 @@ const Home: NextPage = () => {
   // ユーザーがメンバーシップ NFT を持っているかどうかを知るためのステートを定義
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
 
+  // NFT をミンティングしている間を表すステートを定義
+  const [isClaiming, setIsClaiming] = useState(false);
+
   // メンバーごとの保有しているトークンの数をステートとして宣言
   const [memberTokenAmounts, setMemberTokenAmounts] = useState<any>([]);
-  
+
   // DAO メンバーのアドレスをステートで宣言
   const [memberAddresses, setMemberAddresses] = useState<string[] | undefined>([]);
 
@@ -99,6 +101,7 @@ const Home: NextPage = () => {
       }
     };
     checkIfUserHasVoted();
+
   }, [hasClaimedNFT, proposals, address, vote]);
 
   // メンバーシップを保持しているメンバーの全アドレスを取得します
@@ -107,7 +110,7 @@ const Home: NextPage = () => {
       return;
     }
 
-    // 先ほどエアドロップしたユーザーがここで取得できます（発行された tokenID 0 のメンバーシップ NFT）
+    // 先ほどエアドロップしたユーザーがここで取得できます（発行された tokenchainID 0 のメンバーシップ NFT）
     const getAllAddresses = async () => {
       try {
         const memberAddresses = await editionDrop?.history.getAllClaimerAddresses(
@@ -157,9 +160,6 @@ const Home: NextPage = () => {
     });
   }, [memberAddresses, memberTokenAmounts]);
 
-  // NFT をミンティングしている間を表すステートを定義
-  const [isClaiming, setIsClaiming] = useState(false);
-
   useEffect(() => {
     // もしウォレットに接続されていなかったら処理をしない
     if (!address) {
@@ -190,7 +190,7 @@ const Home: NextPage = () => {
       setIsClaiming(true);
       await editionDrop!.claim('0', 1);
       console.log(
-        `🌊 Successfully Minted! Check it out on etherscan: https://sepolia.etherscan.io/address/${editionDrop!.getAddress()}`
+        `🌊Successfully Minted! Check it out on etherscan: https://sepolia.etherscan.io/address/${editionDrop!.getAddress()}/0`
       );
       setHasClaimedNFT(true);
     } catch (error) {
@@ -278,7 +278,7 @@ const Home: NextPage = () => {
                       vote: 2,
                     };
                     proposal.votes.forEach((vote) => {
-                      const elem = document.getElementById(
+                      const elem = document.getElementBychainId(
                         proposal.proposalId + '-' + vote.type
                       ) as HTMLInputElement;
 
@@ -347,7 +347,7 @@ const Home: NextPage = () => {
                         <div key={type}>
                           <input
                             type="radio"
-                            id={proposal.proposalId + '-' + type}
+                            chainId={proposal.proposalId + '-' + type}
                             name={proposal.proposalId.toString()}
                             value={type}
                             // デフォルトで棄権票をチェックする
@@ -381,7 +381,7 @@ const Home: NextPage = () => {
           </div>
         </main>
       </div>
-    ); 
+    );
   }
   // ウォレットと接続されていたら Mint ボタンを表示
   else {
