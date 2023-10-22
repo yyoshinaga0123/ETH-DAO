@@ -26,6 +26,9 @@ const Home: NextPage = () => {
   // ユーザーがメンバーシップ NFT を持っているかどうかを知るためのステートを定義
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
 
+  // NFT をミンティングしている間を表すステートを定義
+  const [isClaiming, setIsClaiming] = useState(false);
+
   useEffect(() => {
     // もしウォレットに接続されていなかったら処理をしない
     if (!address) {
@@ -47,13 +50,43 @@ const Home: NextPage = () => {
         console.error('Failed to get balance', error);
       }
     };
-
     // 関数を実行
     checkBalance();
   }, [address, editionDrop]);
 
+  const mintNft = async () => {
+    try {
+      setIsClaiming(true);
+      await editionDrop!.claim('0', 1);
+      console.log(
+        `🌊 Successfully Minted! Check it out on etherscan: https://sepolia.etherscan.io/address/${editionDrop!.getAddress()}`
+      );
+      setHasClaimedNFT(true);
+    } catch (error) {
+      setHasClaimedNFT(false);
+      console.error('Failed to mint NFT', error);
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  // ウォレットと接続していなかったら接続を促す
+  if (!address) {
+    return (
+      <div className={styles.container}>
+        <main className={styles.main}>
+          <h1 className={styles.title}>
+            Welcome to Tokyo Sauna Collective !!
+          </h1>
+          <div className={styles.connect}>
+            <ConnectWallet />
+          </div>
+        </main>
+      </div>
+    );
+  }
   // テストネットが Sepolia ではなかった場合に警告を表示
-  if (chain && chain.chainId !== Sepolia.chainId) {
+  else if (chain && chain.chainId !== Sepolia.chainId) {
     console.log('wallet address: ', address);
     console.log('chain name: ', chain.name);
 
@@ -66,16 +99,16 @@ const Home: NextPage = () => {
         </main>
       </div>
     );
-  } else {
+  }
+  // ウォレットと接続されていたら Mint ボタンを表示
+  else {
     return (
       <div className={styles.container}>
         <main className={styles.main}>
-          <h1 className={styles.title}>
-            Welcome to Tokyo Sauna Collective !!
-          </h1>
-          <div className={styles.connect}>
-            <ConnectWallet />
-          </div>
+          <h1 className={styles.title}>Mint your free 🍪DAO Membership NFT</h1>
+          <button disabled={isClaiming} onClick={mintNft}>
+            {isClaiming ? 'Minting...' : 'Mint your nft (FREE)'}
+          </button>
         </main>
       </div>
     );
