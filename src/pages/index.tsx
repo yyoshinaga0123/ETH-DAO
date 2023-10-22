@@ -173,14 +173,38 @@ const Home: NextPage = () => {
       </div>
     );
   }
-  // DAO ダッシュボード画面を表示
-  else if (hasClaimedNFT){
-    return (
-      <div className={styles.container}>
-      <main className={styles.main}>
-        <h1 className={styles.title}>🍪DAO Member Page</h1>
-        <p>Congratulations on being a member</p>
-      </main>
+// ユーザーがすでに NFT を要求している場合は、内部 DAO ページを表示します
+// これは DAO メンバーだけが見ることができ、すべてのメンバーとすべてのトークン量をレンダリングします
+else if (hasClaimedNFT){
+  return (
+    <div className={styles.container}>
+    <main className={styles.main}>
+      <h1 className={styles.title}>🍪DAO Member Page</h1>
+      <p>Congratulations on being a member</p>
+      <div>
+        <div>
+          <h2>Member List</h2>
+          <table className="card">
+            <thead>
+              <tr>
+                <th>Address</th>
+                <th>Token Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {memberList!.map((member) => {
+                return (
+                  <tr key={member.address}>
+                    <td>{shortenAddress(member.address)}</td>
+                    <td>{member.tokenAmount}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
     </div>
     );
   }
